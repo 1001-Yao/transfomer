@@ -62,6 +62,7 @@ def scaled_dot_product_attention(query, key, value, mask=None, dropout=None):
     # 掩码：把需要屏蔽的位置的分数压到极小，softmax 后权重≈0
     if mask is not None:
         scores = scores.masked_fill(mask, NEG_INF)
+        # 把 scores 里 mask 为 True 的位置，全部替换成负无穷大
 
     # 最后一个向量：第 i 个 query 对所有 key 的相似度
     # 在最后一维（键的位置）做 softmax，得到每条 query 对所有 key 的注意力分布
@@ -131,7 +132,7 @@ class MultiHeadAttention(nn.Module):
         return x.view(B, L, self.d_model)          # (B, L, d_model)
 
     def forward(self, query, key, value, mask=None):
-        """
+        self.model_ = """
         参数:
             query : (B, L_q, d_model)
             key   : (B, L_k, d_model)

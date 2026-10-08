@@ -49,6 +49,8 @@ class EncoderLayer(nn.Module):
         # 子层 1：自注意力。Q = K = V = x（这就是"自"注意力的含义）
         # 用 lambda 把 mask 固定进去，交给 SublayerConnection 去做残差和归一化
         x = self.sublayer[0](x, lambda t: self.self_attn(t, t, t, src_mask))
+        # 在语法上 会调用sublayer（SublayerConnection）的forward方法
+        # lambda 是 Python 里的"匿名函数"——一个没有名字的小函数：lambda 参数: 返回值表达式
         # 子层 2：逐位置前馈网络
         return self.sublayer[1](x, self.feed_forward)
 
