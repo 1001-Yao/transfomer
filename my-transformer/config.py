@@ -65,3 +65,5 @@ class Config:
     def max_decode_len(self) -> int:
         """推理时最多生成多少个 token（源句最长长度 + <bos> + <eos>）"""
         return self.max_len + 2
+
+
