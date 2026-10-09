@@ -50,12 +50,12 @@ class LabelSmoothingLoss(nn.Module):
         """
         参数:
             logits : (B, L, V) 模型输出，**未经过 softmax** 的原始分数
-            target : (B, L)    每个位置的真实词 id
+            target : (B, L)    每个位置的真实词 id/标签
 
         返回:
             标量损失（对非 <pad> 位置取平均）
         """
-        V = logits.size(-1)
+        V = logits.size(-1) # 词表大小
 
         # 把 batch 和长度两维压平，问题就变成"一堆独立的 V 分类任务"
         logits = logits.reshape(-1, V)              # (B*L, V)

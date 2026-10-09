@@ -67,7 +67,7 @@ class PositionalEncoding(nn.Module):
 
         self.dropout = nn.Dropout(dropout)
 
-        # pe[pos, i] : 位置 pos 在第 i 个维度上的编码值
+        # pe[pos, i] : 位置 pos 在第 i 个维度上的编码值,pe即为一个位置矩阵
         pe = torch.zeros(max_len, d_model)
 
         # position: (max_len, 1)，每个位置的下标 0,1,2,...
@@ -76,13 +76,14 @@ class PositionalEncoding(nn.Module):
         # 10000^(2i/d_model) 用 exp/log 形式算，避免数值溢出。
         # 等价于 1 / 10000^(2i/d_model)，i = 0..d_model/2-1
         div_term = torch.exp(
+            # torch.arange(start, end, step)， math.log(10000.0)，其为自然对数lnx
             torch.arange(0, d_model, 2, dtype=torch.float) * (-math.log(10000.0) / d_model)
         )
 
         pe[:, 0::2] = torch.sin(position * div_term)   # 偶数维用 sin
         pe[:, 1::2] = torch.cos(position * div_term)   # 奇数维用 cos
 
-        pe = pe.unsqueeze(0)                            # (1, max_len, d_model)，方便广播
+        pe = pe.unsqueeze(0)                            # (1, max_len, d_model)，方便广播,因为会应用一批的矩阵，新增对应batch
         self.register_buffer("pe", pe)
         self.max_len = max_len
 
@@ -97,7 +98,8 @@ class PositionalEncoding(nn.Module):
         # 词向量 + 位置向量（论文式 (3) 的前半步），然后做 dropout。
         # 论文 5.4 节："apply dropout to the sums of the embeddings and the
         # positional encodings"，所以 dropout 加在相加之后。
-        return self.dropout(x + self.pe[:, :L])
+        x = x + (self.pe[:, :x.shape[1], :]).requires_grad_(False)
+        return self.dropout(x)
 
 
 class TransformerEmbedding(nn.Module):
